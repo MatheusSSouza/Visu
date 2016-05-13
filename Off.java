@@ -242,6 +242,8 @@ public class Off extends SimpleUniverse {
             //ta.setColors(0, cl);//Colorir
             //Printer.print(ta, "C:\\Users\\matheus\\Desktop\\cowta.txt");
             
+            calcOposto();
+            
             print();
             return makeShape(ta);
         } catch (Exception e) {
@@ -340,7 +342,7 @@ public class Off extends SimpleUniverse {
                     }
                 }
             }
-            //SET OPOSTO USANDO ARRAY O
+            mf.get(i).setOposto(o);
         }
     }
 
@@ -398,6 +400,7 @@ public class Off extends SimpleUniverse {
             vertex[0] = x;
             vertex[1] = y;
             vertex[2] = z;
+            opostos = new int[3];
         }
 
         public int[] getCoordinates() {
@@ -425,12 +428,12 @@ public class Off extends SimpleUniverse {
          * @param idFace - O id da face que e oposta ao idPonto dessa face 
          */
         
-        public void setOposto(int idPonto, int idFace){
-            opostos[idPonto] = idFace;
+        public void setOposto(int[] ops){
+            opostos = Arrays.copyOf(ops, opostos.length);
         }
         
         public String toString(){
-            return Arrays.toString(vertex);
+            return Arrays.toString(vertex)+ "    \t" + Arrays.toString(opostos);
         }
     }
 }
