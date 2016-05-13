@@ -44,13 +44,13 @@ public class Off extends SimpleUniverse {
     public final int GROUP_BG = 0;
     public final int LIGHT_BG = 1;
     public final int SHAPE_TG = 0;
-    private Color3f color;//Manter a cor atual
+    private Color3f color = new Color3f(Color.GREEN);//Manter a cor atual
 
-    private int npoints;
+    private int nvertex;
     private double maxdist;
     private Shape3D shape;
     private BranchGroup bg;
-    private ArrayList<Point3d> points;
+    private ArrayList<Point3d> vertex;
     private ArrayList<Celula> mf;
 
     MouseWheelZoom mwz;
@@ -163,7 +163,7 @@ public class Off extends SimpleUniverse {
         this.getViewer().getView().setBackClipDistance(500);
         this.getViewer().getView().setFrontClipDistance(0.01);
         this.getViewer().getView().setFieldOfView(Math.toRadians(90));
-        System.out.println(maxdist);
+        //System.out.println(maxdist);
     }
 
     private Shape3D loadoff(File file) {
@@ -172,38 +172,40 @@ public class Off extends SimpleUniverse {
             Scanner sc = new Scanner(file).useLocale(java.util.Locale.US);
             sc.nextLine();
 
-            int np = sc.nextInt();
-            int nf = sc.nextInt();
-            int ne = sc.nextInt();
-            npoints = np;
+            int nv = sc.nextInt();//Numero de vertices
+            int nf = sc.nextInt();//Numero de faces
+            int na = sc.nextInt();//Numero de arestas
+            nvertex = nv;
 
-            points = new ArrayList<>();
+            vertex = new ArrayList<>();
             TriangleArray ta = new TriangleArray(nf * 3, TriangleArray.COORDINATES);// | GeometryArray.COLOR_3);
             mf = new ArrayList<>();
             Color3f[] cl = new Color3f[nf * 3];
 
-            for (int x = 0; x < np; x++) {
-                points.add(new Point3d(sc.nextFloat(), sc.nextFloat(), sc.nextFloat()));
-                if (Math.abs(points.get(x).x) > maxdist) {
-                    maxdist = Math.abs(points.get(x).x);
+            //carrega os vertices da .off no array vertex
+            for (int x = 0; x < nv; x++) {
+                vertex.add(new Point3d(sc.nextFloat(), sc.nextFloat(), sc.nextFloat()));
+                if (Math.abs(vertex.get(x).x) > maxdist) {
+                    maxdist = Math.abs(vertex.get(x).x);
                 }
-                if (Math.abs(points.get(x).y) > maxdist) {
-                    maxdist = Math.abs(points.get(x).y);
+                if (Math.abs(vertex.get(x).y) > maxdist) {
+                    maxdist = Math.abs(vertex.get(x).y);
                 }
-                if (Math.abs(points.get(x).z) > maxdist) {
-                    maxdist = Math.abs(points.get(x).z);
+                if (Math.abs(vertex.get(x).z) > maxdist) {
+                    maxdist = Math.abs(vertex.get(x).z);
                 }
 
             }
 
             maxdist *= 2;
 
-            for (int x = 0; x < np; x++) {
-                Point3d p = points.remove(x);
+            //Normaliza o vertex
+            for (int x = 0; x < nv; x++) {
+                Point3d p = vertex.remove(x);
                 p.setX(p.getX() / maxdist);
                 p.setY(p.getY() / maxdist);
                 p.setZ(p.getZ() / maxdist);
-                points.add(x, p);
+                vertex.add(x, p);
             }
             //Printer.print(points, "C:\\Users\\matheus\\Desktop\\cowar.txt");
             for (int x = 0; x < nf * 3;) {
@@ -211,9 +213,9 @@ public class Off extends SimpleUniverse {
                 int i1 = sc.nextInt();
                 int i2 = sc.nextInt();
                 int i3 = sc.nextInt();
-                Point3d p1 = points.get(i1);
-                Point3d p2 = points.get(i2);
-                Point3d p3 = points.get(i3);
+                Point3d p1 = vertex.get(i1);
+                Point3d p2 = vertex.get(i2);
+                Point3d p3 = vertex.get(i3);
                 
                 /**
                  * Colorir *
@@ -242,9 +244,9 @@ public class Off extends SimpleUniverse {
             //ta.setColors(0, cl);//Colorir
             //Printer.print(ta, "C:\\Users\\matheus\\Desktop\\cowta.txt");
             
-            calcOposto();
+            //calcOposto();
             
-            print();
+            //print();
             return makeShape(ta);
         } catch (Exception e) {
             System.out.println("Erro ao tentar contruir OFF\n" + e.getMessage());
@@ -259,7 +261,9 @@ public class Off extends SimpleUniverse {
         ng.generateNormals(forminfo);
 
         Appearance a = new Appearance();
-        a.setMaterial(new Material());
+        Material mat = new Material();
+        mat.setDiffuseColor(new Color3f(Color.GREEN));
+        a.setMaterial(mat);
         a.setPolygonAttributes(new PolygonAttributes());
 
         return new Shape3D(forminfo.getGeometryArray(), a);
@@ -363,7 +367,7 @@ public class Off extends SimpleUniverse {
     }
 
     public int getnPoints() {
-        return npoints;
+        return nvertex;
     }
 
     public int getnFaces() {
