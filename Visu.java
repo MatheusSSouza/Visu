@@ -1,3 +1,5 @@
+package Visu;
+
 import com.sun.j3d.utils.picking.PickCanvas;
 import com.sun.j3d.utils.picking.PickIntersection;
 import com.sun.j3d.utils.picking.PickResult;
