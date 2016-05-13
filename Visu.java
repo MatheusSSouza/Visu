@@ -83,13 +83,13 @@ public class Visu extends JFrame implements MouseListener{
         
         //Popula o frame
         this.add(cv, CENTER);
-        this.add(menu(polygon), NORTH);
+        this.add(menu(), NORTH);
         //this.add(mark(polygon), WEST);
         
         this.setVisible(true);
     }
     
-    private JPanel menu(Off root){//Constroi o painel da menu
+    private JPanel menu(){//Constroi o painel da menu
         JPanel menu = new JPanel(new FlowLayout());
         menu.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/10));
         menu.setBackground(Color.blue);
@@ -109,24 +109,24 @@ public class Visu extends JFrame implements MouseListener{
         btOpen.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ae) {
                 if(FilePick.showOpenDialog(rootPane) == JFileChooser.APPROVE_OPTION) {
-                   root.OpenFile(FilePick.getSelectedFile());
+                   polygon.OpenFile(FilePick.getSelectedFile());
                    System.out.println(FilePick.getSelectedFile());
                 }
             }
         });
         btPoint.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ae) {
-                root.setPAttributes(root.POLYGON_POINT);
+                polygon.setPAttributes(polygon.POLYGON_POINT);
             }
         });
         btLine.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ae) {
-                root.setPAttributes(root.POLYGON_LINE);
+                polygon.setPAttributes(polygon.POLYGON_LINE);
             }
         });
         btFill.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ae) {
-                root.setPAttributes(root.POLYGON_FILL);
+                polygon.setPAttributes(polygon.POLYGON_FILL);
             }
         });
         

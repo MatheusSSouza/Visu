@@ -28,6 +28,8 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Color3f;
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Arrays;
+import javafx.geometry.Point3D;
 import javax.media.j3d.PhysicalBody;
 import javax.media.j3d.PhysicalEnvironment;
 import javax.media.j3d.Transform3D;
@@ -49,6 +51,7 @@ public class Off extends SimpleUniverse {
     private Shape3D shape;
     private BranchGroup bg;
     private ArrayList<Point3d> points;
+    private ArrayList<Celula> mf;
 
     MouseWheelZoom mwz;
     MouseRotate mr;
@@ -119,7 +122,7 @@ public class Off extends SimpleUniverse {
 
     public void OpenFile(File file) {
         bg.detach();
-        TransformGroup tg = ((TransformGroup) bg.getChild(GROUP_BG));
+        TransformGroup tg = (TransformGroup) bg.getChild(GROUP_BG);
         tg.removeAllChildren();
 
         shape = loadoff(file);
@@ -150,9 +153,13 @@ public class Off extends SimpleUniverse {
 //        tf.setTranslation(new Vector3d(0, 0, -maxdist*(Math.sqrt(maxdist+1))));
 //        tg.setTransform(tf);
         Transform3D tf = new Transform3D();
-        tf.setScale(1 / maxdist);
+//        tf.setScale(1 / maxdist);
+//        tg.setTransform(tf);
+        tf = new Transform3D();
+        tf.setTranslation(new Vector3d(0, 0, 0));
         tg.setTransform(tf);
-//        
+
+
         this.getViewer().getView().setBackClipDistance(500);
         this.getViewer().getView().setFrontClipDistance(0.01);
         this.getViewer().getView().setFieldOfView(Math.toRadians(90));
@@ -171,7 +178,8 @@ public class Off extends SimpleUniverse {
             npoints = np;
 
             points = new ArrayList<>();
-            TriangleArray ta = new TriangleArray(nf * 3, TriangleArray.COORDINATES | GeometryArray.COLOR_3);
+            TriangleArray ta = new TriangleArray(nf * 3, TriangleArray.COORDINATES);// | GeometryArray.COLOR_3);
+            mf = new ArrayList<>();
             Color3f[] cl = new Color3f[nf * 3];
 
             for (int x = 0; x < np; x++) {
@@ -186,9 +194,6 @@ public class Off extends SimpleUniverse {
                     maxdist = Math.abs(points.get(x).z);
                 }
 
-//                if(points.get(x).x > maxdist)maxdist = points.get(x).x;
-//                if(points.get(x).y > maxdist)maxdist = points.get(x).y;
-//                if(points.get(x).z > maxdist)maxdist = points.get(x).z;
             }
 
             maxdist *= 2;
@@ -200,25 +205,44 @@ public class Off extends SimpleUniverse {
                 p.setZ(p.getZ() / maxdist);
                 points.add(x, p);
             }
-            Printer.print(points, "C:\\Users\\matheus\\Desktop\\cowar.txt");
+            //Printer.print(points, "C:\\Users\\matheus\\Desktop\\cowar.txt");
             for (int x = 0; x < nf * 3;) {
-                for (int nsides = sc.nextInt(); nsides > 0; nsides--) {
-                    Point3d co = points.get(sc.nextInt());
-//                    cl[x] = new Color3f(Color.green);
-                    /**
-                     * Colorir*
-                     */
-                    if (co.x > 0) {
-                        cl[x] = new Color3f(Color.CYAN);
-                    } else {
-                        cl[x] = new Color3f(Color.ORANGE);
-                    }
+                sc.nextInt();
+                int i1 = sc.nextInt();
+                int i2 = sc.nextInt();
+                int i3 = sc.nextInt();
+                Point3d p1 = points.get(i1);
+                Point3d p2 = points.get(i2);
+                Point3d p3 = points.get(i3);
+                
+                /**
+                 * Colorir *
+                 */
+//                if (p1.x > 0) {
+//                    cl[x] = new Color3f(Color.CYAN);
+//                } else {
+//                    cl[x] = new Color3f(Color.ORANGE);
+//                }
+//                if (p2.x > 0) {
+//                    cl[x] = new Color3f(Color.CYAN);
+//                } else {
+//                    cl[x] = new Color3f(Color.ORANGE);
+//                }
+//                if (p3.x > 0) {
+//                    cl[x] = new Color3f(Color.CYAN);
+//                } else {
+//                    cl[x] = new Color3f(Color.ORANGE);
+//                }
 
-                    ta.setCoordinate(x++, co);
-                }
+                mf.add(new Celula(i1, i2, i3));
+                ta.setCoordinate(x++, p1);
+                ta.setCoordinate(x++, p2);
+                ta.setCoordinate(x++, p3);
             }
-            ta.setColors(0, cl);//Colorir
+            //ta.setColors(0, cl);//Colorir
             //Printer.print(ta, "C:\\Users\\matheus\\Desktop\\cowta.txt");
+            
+            print();
             return makeShape(ta);
         } catch (Exception e) {
             System.out.println("Erro ao tentar contruir OFF\n" + e.getMessage());
@@ -304,6 +328,21 @@ public class Off extends SimpleUniverse {
                 + Math.pow(p1.z - p2.z, 2)
         );
     }
+    
+    private void calcOposto(){
+        for (int i = 0; i < mf.size(); i++) {
+            int[] v = mf.get(i).getCoordinates();
+            int[] o = {-1, -1, -1};
+            for (int j = 0; j < v.length; j++) {
+                for (int k = 0; k < mf.size(); k++) {
+                    if(mf.get(k).contains(v[(j+1)%3], v[(j+2)%3])){
+                        o[j] = k;
+                    }
+                }
+            }
+            //SET OPOSTO USANDO ARRAY O
+        }
+    }
 
     private void addlight() {
         bg.removeChild(LIGHT_BG);
@@ -339,11 +378,59 @@ public class Off extends SimpleUniverse {
     }
 
     public void print() {
-        System.out.println("hjfkfdufl\nljduf");
+        for (Celula c : mf) {
+            System.out.println(c);
+        }
+        System.out.println(mf.size());
     }
 
     //ViewingPlatform vp = this.getViewingPlatform().getViewPlatform().set
     //this.getViewingPlatform().setCapability(ViewingPlatform.ALLOW_AUTO_COMPUTE_BOUNDS_WRITE);
     //this.getViewingPlatform().setBoundsAutoCompute(true);
     //this.getViewingPlatform().compile();
+    
+    class Celula{
+        int[] vertex;//id do ponto armazenado em points
+        int[] opostos;//id das faces armazenadas em mf
+        
+        public Celula(int x, int y, int z){
+            vertex = new int[3];
+            vertex[0] = x;
+            vertex[1] = y;
+            vertex[2] = z;
+        }
+
+        public int[] getCoordinates() {
+            return vertex;
+        }
+        
+        public boolean contains(int x, int y){
+            if(x == y){
+                System.err.println("Erro: Contains invalido.");
+                return false;
+            }
+            else{
+                boolean bx = false, by = false;
+                for (int i : vertex) {
+                    if(i == x) bx = true;
+                    if(i == y) by = true;
+                }
+                return bx && by;
+            }
+        }
+        
+        /**
+         * 
+         * @param idPonto - O id do ponto dessa face que tem como face oposta a face de idFadce
+         * @param idFace - O id da face que e oposta ao idPonto dessa face 
+         */
+        
+        public void setOposto(int idPonto, int idFace){
+            opostos[idPonto] = idFace;
+        }
+        
+        public String toString(){
+            return Arrays.toString(vertex);
+        }
+    }
 }
