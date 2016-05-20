@@ -52,6 +52,8 @@ public class Off extends SimpleUniverse {
     private BranchGroup bg;
     private ArrayList<Point3d> vertex;
     private ArrayList<Celula> mf;
+    
+    private mfMalha m;
 
     MouseWheelZoom mwz;
     MouseRotate mr;
@@ -138,7 +140,7 @@ public class Off extends SimpleUniverse {
         tg.addChild(mt);
         mt.setSchedulingBounds(tg.getBounds());
 
-        TransformGroup tt = new TransformGroup();
+//        TransformGroup tt = new TransformGroup();
 //        Text2D marks = new Text2D("hey", new Color3f(Color.YELLOW),
 //                "Helvetica", 80, Font.PLAIN);
 //        tg.addChild(marks);
@@ -167,92 +169,106 @@ public class Off extends SimpleUniverse {
     }
 
     private Shape3D loadoff(File file) {
-        maxdist = 0;
-        try {
-            Scanner sc = new Scanner(file).useLocale(java.util.Locale.US);
-            sc.nextLine();
-
-            int nv = sc.nextInt();//Numero de vertices
-            int nf = sc.nextInt();//Numero de faces
-            int na = sc.nextInt();//Numero de arestas
-            nvertex = nv;
-
-            vertex = new ArrayList<>();
-            TriangleArray ta = new TriangleArray(nf * 3, TriangleArray.COORDINATES);// | GeometryArray.COLOR_3);
-            mf = new ArrayList<>();
-            Color3f[] cl = new Color3f[nf * 3];
-
-            //carrega os vertices da .off no array vertex
-            for (int x = 0; x < nv; x++) {
-                vertex.add(new Point3d(sc.nextFloat(), sc.nextFloat(), sc.nextFloat()));
-                if (Math.abs(vertex.get(x).x) > maxdist) {
-                    maxdist = Math.abs(vertex.get(x).x);
-                }
-                if (Math.abs(vertex.get(x).y) > maxdist) {
-                    maxdist = Math.abs(vertex.get(x).y);
-                }
-                if (Math.abs(vertex.get(x).z) > maxdist) {
-                    maxdist = Math.abs(vertex.get(x).z);
-                }
-
-            }
-
-            maxdist *= 2;
-
-            //Normaliza o vertex
-            for (int x = 0; x < nv; x++) {
-                Point3d p = vertex.remove(x);
-                p.setX(p.getX() / maxdist);
-                p.setY(p.getY() / maxdist);
-                p.setZ(p.getZ() / maxdist);
-                vertex.add(x, p);
-            }
-            //Printer.print(points, "C:\\Users\\matheus\\Desktop\\cowar.txt");
-            for (int x = 0; x < nf * 3;) {
-                sc.nextInt();
-                int i1 = sc.nextInt();
-                int i2 = sc.nextInt();
-                int i3 = sc.nextInt();
-                Point3d p1 = vertex.get(i1);
-                Point3d p2 = vertex.get(i2);
-                Point3d p3 = vertex.get(i3);
-                
-                /**
-                 * Colorir *
-                 */
-//                if (p1.x > 0) {
-//                    cl[x] = new Color3f(Color.CYAN);
-//                } else {
-//                    cl[x] = new Color3f(Color.ORANGE);
-//                }
-//                if (p2.x > 0) {
-//                    cl[x] = new Color3f(Color.CYAN);
-//                } else {
-//                    cl[x] = new Color3f(Color.ORANGE);
-//                }
-//                if (p3.x > 0) {
-//                    cl[x] = new Color3f(Color.CYAN);
-//                } else {
-//                    cl[x] = new Color3f(Color.ORANGE);
-//                }
-
-                mf.add(new Celula(i1, i2, i3));
-                ta.setCoordinate(x++, p1);
-                ta.setCoordinate(x++, p2);
-                ta.setCoordinate(x++, p3);
-            }
-            //ta.setColors(0, cl);//Colorir
-            //Printer.print(ta, "C:\\Users\\matheus\\Desktop\\cowta.txt");
-            
-            //calcOposto();
-            
-            //print();
-            return makeShape(ta);
-        } catch (Exception e) {
-            System.out.println("Erro ao tentar contruir OFF\n" + e.getMessage());
-            e.printStackTrace();
+        m = new mfMalha();
+        //TriangleArray ta = new TriangleArray(9, TriangleArray.COORDINATES | GeometryArray.COLOR_3); 
+        
+        mfSoLe l = new mfSoLe();
+        TriangleArray ta = l.leituraOFF(m, file.getAbsolutePath());
+        
+        Color3f[] cl = new Color3f[m.t];
+        for (int i = 0; i < cl.length; i++) {
+            cl[i] = new Color3f(Color.ORANGE);
         }
-        return null;
+        ta.setColors(0, cl);
+        
+        return makeShape(ta);
+        
+//        maxdist = 0;
+//        try {
+//            Scanner sc = new Scanner(file).useLocale(java.util.Locale.US);
+//            sc.nextLine();
+//
+//            int nv = sc.nextInt();//Numero de vertices
+//            int nf = sc.nextInt();//Numero de faces
+//            int na = sc.nextInt();//Numero de arestas
+//            nvertex = nv;
+//
+//            vertex = new ArrayList<>();
+//            TriangleArray ta = new TriangleArray(nf * 3, TriangleArray.COORDINATES);// | GeometryArray.COLOR_3);
+//            mf = new ArrayList<>();
+//            Color3f[] cl = new Color3f[nf * 3];
+//
+//            //carrega os vertices da .off no array vertex
+//            for (int x = 0; x < nv; x++) {
+//                vertex.add(new Point3d(sc.nextFloat(), sc.nextFloat(), sc.nextFloat()));
+//                if (Math.abs(vertex.get(x).x) > maxdist) {
+//                    maxdist = Math.abs(vertex.get(x).x);
+//                }
+//                if (Math.abs(vertex.get(x).y) > maxdist) {
+//                    maxdist = Math.abs(vertex.get(x).y);
+//                }
+//                if (Math.abs(vertex.get(x).z) > maxdist) {
+//                    maxdist = Math.abs(vertex.get(x).z);
+//                }
+//
+//            }
+//
+//            maxdist *= 2;
+//
+//            //Normaliza o vertex
+//            for (int x = 0; x < nv; x++) {
+//                Point3d p = vertex.remove(x);
+//                p.setX(p.getX() / maxdist);
+//                p.setY(p.getY() / maxdist);
+//                p.setZ(p.getZ() / maxdist);
+//                vertex.add(x, p);
+//            }
+//            //Printer.print(points, "C:\\Users\\matheus\\Desktop\\cowar.txt");
+//            for (int x = 0; x < nf * 3;) {
+//                sc.nextInt();
+//                int i1 = sc.nextInt();
+//                int i2 = sc.nextInt();
+//                int i3 = sc.nextInt();
+//                Point3d p1 = vertex.get(i1);
+//                Point3d p2 = vertex.get(i2);
+//                Point3d p3 = vertex.get(i3);
+//                
+//                /**
+//                 * Colorir *
+//                 */
+////                if (p1.x > 0) {
+////                    cl[x] = new Color3f(Color.CYAN);
+////                } else {
+////                    cl[x] = new Color3f(Color.ORANGE);
+////                }
+////                if (p2.x > 0) {
+////                    cl[x] = new Color3f(Color.CYAN);
+////                } else {
+////                    cl[x] = new Color3f(Color.ORANGE);
+////                }
+////                if (p3.x > 0) {
+////                    cl[x] = new Color3f(Color.CYAN);
+////                } else {
+////                    cl[x] = new Color3f(Color.ORANGE);
+////                }
+//
+//                mf.add(new Celula(i1, i2, i3));
+//                ta.setCoordinate(x++, p1);
+//                ta.setCoordinate(x++, p2);
+//                ta.setCoordinate(x++, p3);
+//            }
+//            //ta.setColors(0, cl);//Colorir
+//            //Printer.print(ta, "C:\\Users\\matheus\\Desktop\\cowta.txt");
+//            
+//            //calcOposto();
+//            
+//            //print();
+//            return makeShape(ta);
+//        } catch (Exception e) {
+//            System.out.println("Erro ao tentar contruir OFF\n" + e.getMessage());
+//            e.printStackTrace();
+//        }
+//        return null;
     }
 
     private Shape3D makeShape(TriangleArray tarray) {
