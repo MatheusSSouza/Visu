@@ -32,9 +32,13 @@ import java.util.Arrays;
 import javafx.geometry.Point3D;
 import javax.media.j3d.PhysicalBody;
 import javax.media.j3d.PhysicalEnvironment;
+import javax.media.j3d.PointArray;
+import javax.media.j3d.PointAttributes;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.View;
 import javax.vecmath.Vector3d;
+
+import Visu.mateface.*;
 
 public class Off extends SimpleUniverse {
 
@@ -44,11 +48,15 @@ public class Off extends SimpleUniverse {
     public final int GROUP_BG = 0;
     public final int LIGHT_BG = 1;
     public final int SHAPE_TG = 0;
-    private Color3f color = new Color3f(Color.GREEN);//Manter a cor atual
+    public final int MWZ_TG = 1;
+    public final int MR_TG = 2;
+    public final int MT_TG = 3;
+    public final int SELECT_TG = 4;
+//    private Color3f color = new Color3f(Color.GREEN);//Manter a cor atual
 
     private int nvertex;
     private double maxdist;
-    private Shape3D shape;
+    private Shape3D shape, select, bordo;
     private BranchGroup bg;
     private ArrayList<Point3d> vertex;
     private ArrayList<Celula> mf;
@@ -81,10 +89,10 @@ public class Off extends SimpleUniverse {
         mr.setSchedulingBounds(tg.getBounds());
         mt.setSchedulingBounds(tg.getBounds());
 
-        tg.addChild(mwz);
-        tg.addChild(mr);
-        tg.addChild(mt);
-
+        tg.insertChild(mwz, MWZ_TG);
+        tg.insertChild(mr, MR_TG);
+        tg.insertChild(mt, MT_TG);
+        
         bg.insertChild(new BranchGroup(), LIGHT_BG);
     }
 
@@ -131,14 +139,15 @@ public class Off extends SimpleUniverse {
         tg.insertChild(shape, SHAPE_TG);
 
         mwz.setTransformGroup(tg);
-        tg.addChild(mwz);
+        tg.insertChild(mwz, MWZ_TG);
         mwz.setSchedulingBounds(tg.getBounds());
         mr.setTransformGroup(tg);
-        tg.addChild(mr);
+        tg.insertChild(mr, MR_TG);
         mr.setSchedulingBounds(tg.getBounds());
         mt.setTransformGroup(tg);
-        tg.addChild(mt);
+        tg.insertChild(mt, MT_TG);
         mt.setSchedulingBounds(tg.getBounds());
+        
 
 //        TransformGroup tt = new TransformGroup();
 //        Text2D marks = new Text2D("hey", new Color3f(Color.YELLOW),
@@ -155,6 +164,18 @@ public class Off extends SimpleUniverse {
 //        tf.setTranslation(new Vector3d(0, 0, -maxdist*(Math.sqrt(maxdist+1))));
 //        tg.setTransform(tf);
         Transform3D tf = new Transform3D();
+        maxdist = Double.MIN_VALUE;
+//        for (int i = 0; i < m.vertice.size(); i++) {
+//            if(m.vertice.get(i).getCoords(0)>maxdist){
+//                maxdist = m.vertice.get(i).getCoords(0);
+//            }
+//            if(m.vertice.get(i).getCoords(1)>maxdist){
+//                maxdist = m.vertice.get(i).getCoords(1);
+//            }
+//            if(m.vertice.get(i).getCoords(2)>maxdist){
+//                maxdist = m.vertice.get(i).getCoords(2);
+//            }
+//        }
 //        tf.setScale(1 / maxdist);
 //        tg.setTransform(tf);
         tf = new Transform3D();
@@ -165,6 +186,7 @@ public class Off extends SimpleUniverse {
         this.getViewer().getView().setBackClipDistance(500);
         this.getViewer().getView().setFrontClipDistance(0.01);
         this.getViewer().getView().setFieldOfView(Math.toRadians(90));
+        mfPlay.play2();
         //System.out.println(maxdist);
     }
 
@@ -172,17 +194,25 @@ public class Off extends SimpleUniverse {
         m = new mfMalha();
         //TriangleArray ta = new TriangleArray(9, TriangleArray.COORDINATES | GeometryArray.COLOR_3); 
         
-        mfSoLe l = new mfSoLe();
-        TriangleArray ta = l.leituraOFF(m, file.getAbsolutePath());
+//        mfSoLemat l = new mfSoLemat();
+//        TriangleArray ta = l.leituraOFF(m, file.getAbsolutePath());
+//        Point3d p = new Point3d();
+//        System.out.println(ta.getVertexCount());
+//        for (int j = 0; j < ta.getVertexCount(); j++) {
+// 
+//            ta.getCoordinate(j, p);
+//            System.out.println(p);
+//        }
         
-        Color3f[] cl = new Color3f[m.t];
-        for (int i = 0; i < cl.length; i++) {
-            cl[i] = new Color3f(Color.ORANGE);
-        }
-        ta.setColors(0, cl);
+//        Color3f[] cl = new Color3f[m.t];
+//        for (int i = 0; i < cl.length; i++) {
+//            cl[i] = new Color3f(Color.blue);
+//        }
+//        ta.setColors(0, cl);
+//        
+        TriangleArray ta = mfPlay.play1(file.getAbsolutePath());
         
         return makeShape(ta);
-        
 //        maxdist = 0;
 //        try {
 //            Scanner sc = new Scanner(file).useLocale(java.util.Locale.US);
@@ -278,9 +308,13 @@ public class Off extends SimpleUniverse {
 
         Appearance a = new Appearance();
         Material mat = new Material();
-        mat.setDiffuseColor(new Color3f(Color.GREEN));
+        mat.setDiffuseColor(new Color3f(Color.blue));
+        PolygonAttributes pa = new PolygonAttributes();
+        pa.setCullFace(PolygonAttributes.CULL_NONE);
+        pa.setBackFaceNormalFlip(true);
         a.setMaterial(mat);
-        a.setPolygonAttributes(new PolygonAttributes());
+        a.setPolygonAttributes(pa);
+        
 
         return new Shape3D(forminfo.getGeometryArray(), a);
     }
@@ -307,6 +341,41 @@ public class Off extends SimpleUniverse {
         this.addBranchGraph(bg);
     }
 
+    public void selectPoint2(Point3d ps){
+        PointArray pa = new PointArray(1, GeometryArray.COORDINATES);
+        pa.setCoordinate(0, new Point3d());
+        double min = Double.MAX_VALUE;
+        Point3d paux;
+        int s = 0;
+        for (int i = 0; i < m.vertice.size(); i++) {
+            m.vertice.get(i).getCoords(0);
+            paux = new Point3d(m.vertice.get(i).getCoords(0), m.vertice.get(i).getCoords(1), m.vertice.get(i).getCoords(2));
+            if (dist(paux, ps) < min) {
+                min = dist(paux, ps);
+                s = i;
+            }
+            if(m.vertice.get(i).getCoords(0) == ps.getX()
+                && m.vertice.get(i).getCoords(1) == ps.getY()
+                && m.vertice.get(i).getCoords(2) == ps.getZ()){
+            }
+            
+        }
+        Appearance a = new Appearance();
+        PointAttributes p = new PointAttributes();
+        p.setPointSize(3);
+        a.setPointAttributes(p);
+        pa.setCoordinate(0, new Point3d(m.vertice.get(s).getCoords(0), m.vertice.get(s).getCoords(1), m.vertice.get(s).getCoords(2)));
+        select = new Shape3D(pa, a);
+        TransformGroup tg = (TransformGroup) bg.getChild(GROUP_BG);
+        bg.detach();
+        
+        tg.removeChild(SELECT_TG);
+        tg.insertChild(select, SELECT_TG);
+        
+        this.addBranchGraph(bg);
+    }
+    
+    
     public void selectPoint(Point3d ps) {
         TriangleArray ta = (TriangleArray) shape.getGeometry();
         TransformGroup tg = (TransformGroup) bg.getChild(GROUP_BG);
@@ -333,11 +402,13 @@ public class Off extends SimpleUniverse {
         }
         PolygonAttributes pa = shape.getAppearance().getPolygonAttributes();
         bg.detach();
+        
         ta.setCapability(TriangleArray.COORDINATES | GeometryArray.COLOR_3);
         ta.setCapability(GeometryArray.COLOR_3);
         ta.setColor(s, new Color3f(Color.CYAN));
         shape = makeShape(ta);
         shape.getAppearance().setPolygonAttributes(pa);
+        
         tg.removeChild(shape);
         tg.insertChild(shape, SHAPE_TG);
         this.addBranchGraph(bg);
@@ -364,6 +435,12 @@ public class Off extends SimpleUniverse {
             }
             mf.get(i).setOposto(o);
         }
+    }
+    
+    public void showBordo(){
+//        for (int i = 0; i < ; i++) {
+//            
+//        }
     }
 
     private void addlight() {

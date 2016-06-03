@@ -98,6 +98,8 @@ public class Visu extends JFrame implements MouseListener{
         JButton btPoint = new JButton("Point View");
         JButton btLine = new JButton("Line View");
         JButton btFill = new JButton("Fill View");
+        JButton btBordo = new JButton("Mostrar Bordo");
+        JButton btEstrela = new JButton("Expandir Estrela");
         
         //btOpen.setPreferredSize(new Dimension(50, 50));
         
@@ -105,6 +107,8 @@ public class Visu extends JFrame implements MouseListener{
         menu.add(btPoint);
         menu.add(btLine);
         menu.add(btFill);
+        menu.add(btBordo);
+        menu.add(btEstrela);
         
         btOpen.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ae) {
@@ -125,6 +129,16 @@ public class Visu extends JFrame implements MouseListener{
             }
         });
         btFill.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ae) {
+                polygon.setPAttributes(polygon.POLYGON_FILL);
+            }
+        });
+        btBordo.addActionListener(new ActionListener(){
+            public void actionPerformed(ActionEvent ae) {
+                polygon.setPAttributes(polygon.POLYGON_FILL);
+            }
+        });
+        btEstrela.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent ae) {
                 polygon.setPAttributes(polygon.POLYGON_FILL);
             }
@@ -155,7 +169,7 @@ public class Visu extends JFrame implements MouseListener{
         PickResult pr = screen.pickClosest();
         PickIntersection pi = pr.getClosestIntersection(screen.getStartPosition());
         System.out.println(pi.getPointCoordinates());
-        polygon.selectPoint(pi.getPointCoordinates());
+        polygon.selectPoint2(pi.getPointCoordinates());
     }
 
     public void mousePressed(MouseEvent me) {}

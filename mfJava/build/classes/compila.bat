@@ -1,1 +1,0 @@
-javac -cp . mateface/mfPlay.java mateface/mfAresta.java mateface/mfCelula.java mateface/mfLeitor.java mateface/mfMalha.java mateface/mfNivelEstrela.java mateface/mfVertex.java
